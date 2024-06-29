@@ -193,7 +193,7 @@ label {
   
 
 <script>
-    const api_url = 'https://coproduction-oracle-64rcz.ondigitalocean.app/'
+    const api_url = 'https://coproduction-oracle-64rcz.ondigitalocean.app'
     const placeholder = document.getElementById('placeholder');
     const saveButton = document.getElementById('saveButton');
     const queryButton = document.getElementById('queryButton');
@@ -214,8 +214,9 @@ label {
       'prompt': document.getElementById('prompt').value
     };
 
-    const response = await fetch(`${api_url}/generate`, {
+    const response = await fetch(`${api_url}/generate/`, {
       method: 'POST',
+      mode: 'cors',
       headers: {
         'Content-Type': 'application/json'
       },
