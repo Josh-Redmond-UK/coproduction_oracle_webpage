@@ -118,11 +118,54 @@ label {
     display: block;
     margin-bottom: 5px;
 }
+
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#loading-overlay.hidden {
+  display: none;
+}
+
+.spinner {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #4CAF50;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#loading-overlay p {
+  color: #f0f0f0;
+  margin-top: 20px;
+  font-size: 18px;
+}
+
     </style>
 
 </head> 
 
 <body>
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <p>Summoning the Oracle...</p>
+      </div>
     <div class="container">
       <div class="editor-container">
         <div id="placeholder"></div>
@@ -150,46 +193,48 @@ label {
   
 
 <script>
+    const api_url = 'https://coproduction-oracle-64rcz.ondigitalocean.app/'
     const placeholder = document.getElementById('placeholder');
     const saveButton = document.getElementById('saveButton');
     const queryButton = document.getElementById('queryButton');
 
     queryButton.addEventListener('click', async () => {
-        var imagedata = editor.render().toDataURL("image/png")
-        console.log(imagedata)
-        var imagedata = imagedata.replace('data:image/png;base64,', '')
-        //console.log(imagedata)
-        console.log("Requesting image from diffusion model endpoint")
-        var api_request = {'image': imagedata, 
-        'diffusion_strength':parseFloat(document.getElementById('diffusion_strength').value),
-        'guidance_scale': document.getElementById('guidance_scale').value,
-        'prompt': document.getElementById('prompt').value};
-        //req_string =encodeURIComponent(JSON.stringify(api_request))
-        //request = `http://127.0.0.1:8000/generate/${req_string}`
+  const loadingOverlay = document.getElementById('loading-overlay');
+  loadingOverlay.classList.remove('hidden');
 
+  try {
+    var imagedata = editor.render().toDataURL("image/png")
+    console.log(imagedata)
+    var imagedata = imagedata.replace('data:image/png;base64,', '')
+    console.log("Requesting image from diffusion model endpoint")
+    var api_request = {
+      'image': imagedata,
+      'diffusion_strength': parseFloat(document.getElementById('diffusion_strength').value),
+      'guidance_scale': document.getElementById('guidance_scale').value,
+      'prompt': document.getElementById('prompt').value
+    };
 
-        //var res = await fetch(request)//.then(response => response.json()).then(data => console.log(data));
-        
-        const response = await fetch("http://127.0.0.1:8000/generate", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(api_request)
-        });
-
-        
-        
-        var responsejson = await response.json()
-
-        console.log(responsejson);
-        //console.log(editor)
-        fabric.Image.fromURL(`data:image/png;base64,${responsejson.generated_images[0]}`, function(img) {
-            editor.add(img);
-        });
-        //console.log(editor.add())
-
+    const response = await fetch(`${api_url}/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(api_request)
     });
+
+    var responsejson = await response.json()
+    console.log(responsejson);
+
+    fabric.Image.fromURL(`data:image/png;base64,${responsejson.generated_images[0]}`, function(img) {
+      editor.add(img);
+    });
+  } catch (error) {
+    console.error("An error occurred:", error);
+    // You might want to show an error message to the user here
+  } finally {
+    loadingOverlay.classList.add('hidden');
+  }
+});
 
     saveButton.addEventListener(
 				'click',
@@ -201,8 +246,7 @@ label {
 				},
                 false);
 
-    const editor = miniCanvasEditor.Editor.createBlank(placeholder, 200, 300, {});
-        // Add this to update the slider value displays
+    const editor = miniCanvasEditor.Editor.createBlank(placeholder, 600, 300, {});
         document.getElementById('diffusion_strength').oninput = function() {
       document.getElementById('diffusion_strength_value').textContent = this.value;
     }
