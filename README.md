@@ -1,0 +1,1 @@
+This is the webpage for the Ethical Generative AI 'Coproduction Oracle' project. This allows users to interface easily with a generative AI model. The foundation model is https://huggingface.co/Mitsua/mitsua-diffusion-one which has only been trained on creative commons 0 and public domain image data, and fine-tuned on the illustrations of a collaborating artist. 
