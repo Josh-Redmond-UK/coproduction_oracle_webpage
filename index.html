@@ -198,6 +198,30 @@ label {
     const saveButton = document.getElementById('saveButton');
     const queryButton = document.getElementById('queryButton');
 
+    async function makePreflightRequest() {
+  try {
+    await fetch(`${api_url}/generate/`, {
+      method: 'OPTIONS',
+      mode: 'cors',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Preflight request completed successfully');
+  } catch (error) {
+    console.error('Preflight request failed:', error);
+  }
+}
+
+  document.addEventListener('DOMContentLoaded', (event) => {
+    makePreflightRequest();
+  });
+
+
+
+
+
     queryButton.addEventListener('click', async () => {
   const loadingOverlay = document.getElementById('loading-overlay');
   loadingOverlay.classList.remove('hidden');
@@ -217,6 +241,7 @@ label {
     const response = await fetch(`${api_url}/generate/`, {
       method: 'POST',
       mode: 'cors',
+      credentials: 'include', 
       headers: {
         'Content-Type': 'application/json'
       },
