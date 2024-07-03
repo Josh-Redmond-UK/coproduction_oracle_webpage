@@ -201,7 +201,7 @@ label {
     async function makePreflightRequest() {
   try {
     await fetch(`${api_url}/generate/`, {
-      method: 'OPTIONS',
+      method: 'POST',
       mode: 'cors',
       headers: {
         'Content-Type': 'application/json'
